@@ -22,7 +22,7 @@ module.exports = class extends think.Controller {
    * @returns {Number}
    */
   getTime() {
-    return parseInt(Date.now() / 1000);
+    return parseInt(new Date()/ 1000);
   }
 
   /**

@@ -23,14 +23,13 @@ module.exports = class extends Base {
       // 查找商品的图片
       cartItem.list_pic_url = await this.model('goods').where({id: cartItem.goods_id}).getField('list_pic_url', true);
     }
-
     return {
       cartList: cartList,
       cartTotal: {
         goodsCount: goodsCount,
-        goodsAmount: goodsAmount,
+        goodsAmount: goodsAmount.toFixed(2),
         checkedGoodsCount: checkedGoodsCount,
-        checkedGoodsAmount: checkedGoodsAmount
+        checkedGoodsAmount: checkedGoodsAmount.toFixed(2)
       }
     };
   }
@@ -142,9 +141,9 @@ module.exports = class extends Base {
       // 添加规格名和值
       let goodsSepcifition = [];
       if (!think.isEmpty(productInfo.goods_specification_ids)) {
-        goodsSepcifition = await this.model('goods_specification').field(['nideshop_goods_specification.*', 'nideshop_specification.name']).join('nideshop_specification ON nideshop_specification.id=nideshop_goods_specification.specification_id').where({
-          'nideshop_goods_specification.goods_id': goodsId,
-          'nideshop_goods_specification.id': {'in': productInfo.goods_specification_ids.split('_')}
+        goodsSepcifition = await this.model('goods_specification').field(['nfyx_goods_specification.*', 'nfyx_specification.name']).join('nfyx_specification ON nfyx_specification.id=nfyx_goods_specification.specification_id').where({
+          'nfyx_goods_specification.goods_id': goodsId,
+          'nfyx_goods_specification.id': {'in': productInfo.goods_specification_ids.split('_')}
         }).select();
       }
 
@@ -231,14 +230,20 @@ module.exports = class extends Base {
   async checkoutAction() {
     const addressId = this.get('addressId'); // 收货地址id
     // const couponId = this.get('couponId'); // 使用的优惠券id
-
     // 选择的收货地址
     let checkedAddress = null;
-    if (addressId) {
-      checkedAddress = await this.model('address').where({is_default: 1, user_id: think.userId}).find();
+    console.log('userId');
+    console.log(think.userId);
+    console.log('userId');
+    checkedAddress = await this.model('address').where({user_id: think.userId}).find();
+    /*if (addressId) {
+
     } else {
       checkedAddress = await this.model('address').where({id: addressId, user_id: think.userId}).find();
-    }
+    }*/
+      console.log('checkedAddress');
+      console.log(checkedAddress);
+      console.log('checkedAddress');
 
     if (!think.isEmpty(checkedAddress)) {
       checkedAddress.province_name = await this.model('region').getRegionName(checkedAddress.province_id);
@@ -248,7 +253,7 @@ module.exports = class extends Base {
     }
 
     // 根据收货地址计算运费
-    const freightPrice = 0.00;
+
 
     // 获取要购买的商品
     const cartData = await this.getCart();
@@ -262,11 +267,16 @@ module.exports = class extends Base {
 
     // 计算订单的费用
     const goodsTotalPrice = cartData.cartTotal.checkedGoodsAmount; // 商品总价
-    const orderTotalPrice = cartData.cartTotal.checkedGoodsAmount + freightPrice - couponPrice; // 订单的总价
-    const actualPrice = orderTotalPrice - 0.00; // 减去其它支付的金额后，要实际支付的金额
+      console.log(goodsTotalPrice,'goodsTotalPrice');
+    const freightPrice = cartData.cartTotal.checkedGoodsAmount > 88 ? 0 :10;
+      console.log(freightPrice,'freightPrice');
+      const orderTotalPrice = (goodsTotalPrice + freightPrice - couponPrice).toFixed(2); // 订单的总价
+    const actualPrice = (orderTotalPrice - 0.00).toFixed(2); // 减去其它支付的金额后，要实际支付的金额
+
+
 
     return this.success({
-      checkedAddress: checkedAddress,
+      checkedAddress: (!think.isEmpty(checkedAddress)) ? checkedAddress : 0,
       freightPrice: freightPrice,
       checkedCoupon: {},
       couponList: couponList,

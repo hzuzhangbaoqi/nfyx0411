@@ -1,6 +1,6 @@
 {
   "apps": [{
-    "name": "nideshop",
+    "name": "nfyx",
     "script": "production.js",
     "cwd": "/var/www/nideshop",
     "exec_mode": "fork",

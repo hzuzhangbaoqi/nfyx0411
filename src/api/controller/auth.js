@@ -5,9 +5,14 @@ module.exports = class extends Base {
   async loginByWeixinAction() {
     const code = this.post('code');
     const fullUserInfo = this.post('userInfo');
+
+    
+
+
+
     const userInfo = fullUserInfo.userInfo;
     const clientIp = ''; // 暂时不记录 ip
-
+    
     // 获取openid
     const options = {
       method: 'GET',
@@ -15,14 +20,17 @@ module.exports = class extends Base {
       qs: {
         grant_type: 'authorization_code',
         js_code: code,
-        secret: think.config('weixin.secret'),
-        appid: think.config('weixin.appid')
+        appid: 'wxd4a65c6bea26c50e',
+        secret: 'eafc0de32904384f6fcdc7bd4b1ea1e8'
       }
     };
-
+    console.log(options);
     let sessionData = await rp(options);
+    
     sessionData = JSON.parse(sessionData);
+    console.log(sessionData);
     if (!sessionData.openid) {
+      console.log('1');
       return this.fail('登录失败');
     }
 
@@ -30,13 +38,18 @@ module.exports = class extends Base {
     const crypto = require('crypto');
     const sha1 = crypto.createHash('sha1').update(fullUserInfo.rawData + sessionData.session_key).digest('hex');
     if (fullUserInfo.signature !== sha1) {
+      console.log('2');
       return this.fail('登录失败');
     }
 
     // 解释用户数据
     const WeixinSerivce = this.service('weixin', 'api');
     const weixinUserInfo = await WeixinSerivce.decryptUserInfoData(sessionData.session_key, fullUserInfo.encryptedData, fullUserInfo.iv);
+
     if (think.isEmpty(weixinUserInfo)) {
+
+        console.log('console.log(weixinUserInfo);'+weixinUserInfo);
+       console.log('3');
       return this.fail('登录失败');
     }
 

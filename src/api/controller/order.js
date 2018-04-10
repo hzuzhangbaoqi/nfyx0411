@@ -29,11 +29,15 @@ module.exports = class extends Base {
 
     return this.success(orderList);
   }
-
+  /*async cancelAction(){
+      const orderId = this.get('orderId');
+      const result = await this.model('order').where({id:orderId}).delete();
+      console.log(result);
+  }*/
   async detailAction() {
     const orderId = this.get('orderId');
-    const orderInfo = await this.model('order').where({ user_id: 1, id: orderId }).find();
-
+    const orderInfo = await this.model('order').where({ user_id: think.userId, id: orderId }).find();
+    console.log(orderInfo);
     if (think.isEmpty(orderInfo)) {
       return this.fail('订单不存在');
     }
@@ -63,6 +67,7 @@ module.exports = class extends Base {
 
     // 订单可操作的选择,删除，支付，收货，评论，退换货
     const handleOption = await this.model('order').getOrderHandleOption(orderId);
+    console.log(handleOption);
 
     return this.success({
       orderInfo: orderInfo,
@@ -106,7 +111,7 @@ module.exports = class extends Base {
     // 订单价格计算
     const orderTotalPrice = goodsTotalPrice + freightPrice - couponPrice; // 订单的总价
     const actualPrice = orderTotalPrice - 0.00; // 减去其它支付的金额后，要实际支付的金额
-    const currentTime = parseInt(this.getTime() / 1000);
+
 
     const orderInfo = {
       order_sn: this.model('order').generateOrderNumber(),
@@ -128,7 +133,7 @@ module.exports = class extends Base {
       coupon_id: 0,
       coupon_price: couponPrice,
 
-      add_time: currentTime,
+      add_time: new Date()/1000,
       goods_price: goodsTotalPrice,
       order_price: orderTotalPrice,
       actual_price: actualPrice

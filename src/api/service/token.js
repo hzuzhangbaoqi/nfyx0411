@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secret = 'SLDLKKDS323ssdd@#@@gf';
+const secret = 'bf567c18644f58b750ca57e177aae86c';
 
 module.exports = class extends think.Service {
   /**
